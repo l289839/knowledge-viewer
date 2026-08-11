@@ -760,7 +760,7 @@ function renderOnePoint(kp,parent){
   if(!isNaN(r)){
     var pct=(r*100).toFixed(0);
     var color=r>=.8?'#10B981':r>=.5?'#F59E0B':'#EF4444';
-    metaHtml='<div class="point-meta"><div class="mini-bar"><div class="mini-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><span class="mini-text">'+pct+'%</span></div>';
+    metaHtml='<div class="point-meta"><div class="mini-bar"><div class="mini-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><span class="mini-text">'+pct+'%</span>'+(parseInt(kp.explained)>0?'<span class="mini-text" style="margin-left:4px;color:#8B5CF6;font-weight:500">讲'+kp.explained+'次</span>':'')+'</div>';
   }
 
   var masteredBadge=streakVal>=3?' <span class="point-badge badge-mastered">已掌握</span>':'';
