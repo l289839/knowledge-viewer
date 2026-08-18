@@ -268,7 +268,7 @@ svg.icon-xs{width:13px;height:13px;flex-shrink:0}
       <div class="filter-dropdown" id="freqDropdown">
         <button class="filter-btn" onclick="toggleDropdown('freqDropdown')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-          <span id="freqLabel">全部考点</span>
+          <span id="freqLabel">全部</span>
         </button>
         <div class="filter-menu" id="freqMenu"></div>
       </div>
@@ -484,7 +484,7 @@ function resetFilters(){
   document.getElementById('stageLabel').textContent='全部学段';
   document.getElementById('gradeLabel').textContent='全部年级';
   document.getElementById('chapterLabel').textContent='全部章节';
-  document.getElementById('freqLabel').textContent='全部考点';
+  document.getElementById('freqLabel').textContent='全部';
   document.getElementById('searchInput').value='';
   updateStageMenu();
   updateGradeMenu();
@@ -600,7 +600,8 @@ function selectChapter(c){
 
 function updateFreqMenu(){
   var menu=document.getElementById('freqMenu');
-  var html='<button class="active" onclick="selectFreq(\'\')">全部考点</button>';
+  var html='<button class="active" onclick="selectFreq(\'\')">全部</button>';
+  html+='<button onclick="selectFreq(\'any\')">全部考点</button>';
   ['高频','中频','低频'].forEach(function(f){html+='<button onclick="selectFreq(\''+f+'\')">'+f+'</button>'});
   menu.innerHTML=html;
   var cur=document.getElementById('freqLabel').textContent;
@@ -608,7 +609,8 @@ function updateFreqMenu(){
 }
 
 function selectFreq(f){
-  document.getElementById('freqLabel').textContent=f||'全部考点';
+  var labelMap={'':'全部','any':'全部考点'};
+  document.getElementById('freqLabel').textContent=labelMap[f]||f||'全部';
   document.getElementById('freqMenu').classList.remove('open');
   renderStats();
   filterTree();
@@ -654,7 +656,9 @@ function renderStats(){
       var child = node[k];
       if(!child || typeof child !== 'object') return;
       if(child.__kp__){
-        var kps = child.__kp__.filter(function(kp){ return (kp.freq||'').trim() === ff; });
+        var kps = (ff==='全部考点')
+          ? child.__kp__.filter(function(kp){ return (kp.freq||'').trim() !== ''; })
+          : child.__kp__.filter(function(kp){ return (kp.freq||'').trim() === ff; });
         if(kps.length > 0){
           result[k] = Object.assign({}, child);
           result[k].__kp__ = kps;
@@ -669,7 +673,7 @@ function renderStats(){
   if(cf!=='全部章节'){
     dataToScan = collectByChapter(dataToScan, cf);
   }
-  if(ff!=='全部考点'){
+  if(ff!=='全部'){
     dataToScan = collectByFreq(dataToScan, ff);
   }
   var s=getStats(dataToScan);
@@ -931,7 +935,7 @@ function filterTree(){
     var sMatch=sf==='全部学段'||(row.closest('.grade-section')||{}).dataset.stage===sf;
     var gMatch=gf==='全部年级'||(row.closest('.chapter-panel')||{}).dataset.grade===gf.toLowerCase();
     var cMatch=cf==='全部章节'||(row.closest('.chapter-section')||{}).dataset.chapter===cf;
-    var fMatch=ff==='全部考点'||(row.dataset.freq||'')===ff;
+    var fMatch=ff==='全部'||(ff==='全部考点'?((row.dataset.freq||'')!==''):(row.dataset.freq||'')===ff);
     var matches=(!keyword||(row.dataset.label||'').indexOf(keyword)>=0);
     if(sMatch&&gMatch&&cMatch&&fMatch&&matches){row.classList.remove('hidden');totalVisible++}
     else row.classList.add('hidden');
@@ -969,8 +973,12 @@ function getFilteredRows(){
       var cs=el.closest('.chapter-section');
       if(!cs||cs.dataset.chapter!==cf)return;
     }
-    if(ff!=='全部考点'){
-      if((el.dataset.freq||'')!==ff)return;
+    if(ff!=='全部'){
+      if(ff==='全部考点'){
+        if(!(el.dataset.freq||''))return;
+      }else if((el.dataset.freq||'')!==ff){
+        return;
+      }
     }
     result.push(el);
   });
