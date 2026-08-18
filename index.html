@@ -410,6 +410,8 @@ function computePrediction(studentName){
   var coef = getStudentCoef(studentName);
   if(isNaN(masteryRate) || masteryRate <= 0) return null;
   var predicted = masteryRate * fullScore * coef;
+  // 满分封顶：能力系数>1 时防止预测分超过卷面满分
+  if(predicted > fullScore) predicted = fullScore;
   return Math.round(predicted * 100) / 100;
 }
 
